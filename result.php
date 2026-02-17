@@ -1,67 +1,141 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_guess_year'])) { header('Location: game.php'); exit; }
-$gy=$_SESSION['user_guess_year']; $glat=$_SESSION['user_guess_lat']; $glng=$_SESSION['user_guess_lng'];
-$cy=$_SESSION['correct_year']; $clat=$_SESSION['correct_lat']; $clng=$_SESSION['correct_lng'];
-$ydiff=$_SESSION['year_difference']; $dkm=$_SESSION['distance_km'];
-$ys=$_SESSION['year_score']; $ds=$_SESSION['distance_score']; $score=$_SESSION['score'];
-$img_url=$_SESSION['image_url']; $img_loc=$_SESSION['image_location']; $img_desc=$_SESSION['image_description'];
-$total=$_SESSION['total_score']; $rounds=$_SESSION['rounds_played'];
-$pct=($score/10000)*100;
-if ($pct>=95) { $msg="Parfait ! Excellent travail !"; $cls="result-perfect"; }
-elseif ($pct>=85) { $msg="Tres bien ! Impressionnant !"; $cls="result-excellent"; }
-elseif ($pct>=70) { $msg="Bien joue !"; $cls="result-good"; }
-elseif ($pct>=50) { $msg="Pas mal, continuez !"; $cls="result-ok"; }
-elseif ($pct>=30) { $msg="Moyen, il faut reviser !"; $cls="result-medium"; }
-else { $msg="Oups, c'etait loin !"; $cls="result-bad"; }
+if (!isset($_SESSION['user_guess_year'])) {
+	header('Location: game.php');
+	exit;
+}
+
+$annee_utilisateur = $_SESSION['user_guess_year'];
+$lat_utilisateur = $_SESSION['user_guess_lat'];
+$lng_utilisateur = $_SESSION['user_guess_lng'];
+$annee_correcte = $_SESSION['correct_year'];
+$lat_correcte = $_SESSION['correct_lat'];
+$lng_correcte = $_SESSION['correct_lng'];
+$difference_annee = $_SESSION['year_difference'];
+$distance = $_SESSION['distance_km'];
+$score_annee = $_SESSION['year_score'];
+$score_distance = $_SESSION['distance_score'];
+$score_total_round = $_SESSION['score'];
+$image_url = $_SESSION['image_url'];
+$image_lieu = $_SESSION['image_location'];
+$image_description = $_SESSION['image_description'];
+$score_total = $_SESSION['score_total'];
+$nb_rounds = $_SESSION['nb_rounds'];
+
+$pourcentage = ($score_total_round / 10000) * 100;
+
+if ($pourcentage >= 95) {
+	$message = "Parfait ! Excellent !";
+	$couleur_message = "result-perfect";
+} elseif ($pourcentage >= 70) {
+	$message = "Bien joue !";
+	$couleur_message = "result-good";
+} elseif ($pourcentage >= 40) {
+	$message = "Pas mal !";
+	$couleur_message = "result-ok";
+} else {
+	$message = "Dommage, essayez encore !";
+	$couleur_message = "result-bad";
+}
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>TimeGuessr - Resultat</title>
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>#result-map{width:100%;height:400px;border:1px solid #ccc;margin:15px 0}</style>
 </head>
 <body>
-<div class="header"><a href="home.php"><div class="logo">TimeGuessr</div></a><p class="subtitle">Resultat</p></div>
-<div class="container">
-<div class="result-container">
-<h1 class="result-title <?php echo $cls; ?>"><?php echo $msg; ?></h1>
-<div class="image-container"><img src="<?php echo htmlspecialchars($img_url); ?>" alt="Photo"></div>
-<div id="result-map"></div>
-<h3>Resultats</h3>
-<div class="result-grid">
-<div class="result-card"><div class="result-label">Votre annee</div><div class="result-value"><?php echo $gy; ?></div></div>
-<div class="result-card result-correct"><div class="result-label">Annee correcte</div><div class="result-value"><?php echo $cy; ?></div></div>
-<div class="result-card"><div class="result-label">Difference</div><div class="result-value"><?php echo $ydiff; ?> ans</div></div>
+
+<div class="header">
+	<a href="home.php"><h1>TimeGuessr</h1></a>
 </div>
-<div class="result-grid">
-<div class="result-card"><div class="result-label">Score annee</div><div class="result-value"><?php echo $ys; ?></div></div>
-<div class="result-card"><div class="result-label">Score distance (<?php echo $dkm; ?> km)</div><div class="result-value"><?php echo $ds; ?></div></div>
-<div class="result-card result-correct"><div class="result-label">Score total</div><div class="result-value"><?php echo $score; ?> / 10000</div></div>
+
+<h2 class="<?php echo $couleur_message; ?>"><?php echo $message; ?></h2>
+
+<img src="<?php echo htmlspecialchars($image_url); ?>" alt="photo" style="width:100%; max-height:400px;">
+
+<br><br>
+
+<h3>Resultats :</h3>
+
+<table border="1" cellpadding="10" style="border-collapse:collapse;">
+	<tr style="background-color:#f0f0f0;">
+		<td><b>Votre annee</b></td>
+		<td><?php echo $annee_utilisateur; ?></td>
+	</tr>
+	<tr>
+		<td><b>Annee correcte</b></td>
+		<td style="color:green;"><b><?php echo $annee_correcte; ?></b></td>
+	</tr>
+	<tr style="background-color:#f0f0f0;">
+		<td><b>Difference</b></td>
+		<td><?php echo $difference_annee; ?> ans</td>
+	</tr>
+	<tr>
+		<td><b>Distance</b></td>
+		<td><?php echo $distance; ?> km</td>
+	</tr>
+	<tr style="background-color:#f0f0f0;">
+		<td><b>Score annee</b></td>
+		<td><?php echo $score_annee; ?> pts</td>
+	</tr>
+	<tr>
+		<td><b>Score distance</b></td>
+		<td><?php echo $score_distance; ?> pts</td>
+	</tr>
+	<tr style="background-color:lightyellow;">
+		<td><b>Score du round</b></td>
+		<td><b style="color:navy; font-size:18px;"><?php echo $score_total_round; ?> / 10000</b></td>
+	</tr>
+</table>
+
+<br>
+
+<p><b>Lieu :</b> <?php echo htmlspecialchars($image_lieu); ?></p>
+<p><?php echo htmlspecialchars($image_description); ?></p>
+
+<br>
+
+<h3>Carte :</h3>
+<div id="carte_resultat" style="width:600px; height:350px; border:1px solid black;"></div>
+
+<br>
+
+<p>Score total : <b><?php echo $score_total; ?></b> pts en <b><?php echo $nb_rounds; ?></b> rounds</p>
+
+<br>
+<a href="game.php" class="btn">Image suivante</a>
+&nbsp;&nbsp;
+<a href="reset_game.php" class="btn-success">Recommencer</a>
+
+<br><br>
+
+<div class="footer">
+	<p>Projet scolaire - TimeGuessr</p>
 </div>
-<div style="border:1px solid #ccc;padding:15px;margin-bottom:20px;background:#f9f9f9">
-<strong><?php echo htmlspecialchars($img_loc); ?></strong><br>
-<span style="color:#555"><?php echo htmlspecialchars($img_desc); ?></span>
-</div>
-<div class="btn-container">
-<a href="game.php" class="btn btn-primary">Image suivante</a>
-<a href="reset_game.php" class="btn btn-success">Recommencer</a>
-</div>
-</div>
-</div>
-<div class="footer"><p>TimeGuessr - projet scolaire</p></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const uLat=<?php echo $glat; ?>,uLng=<?php echo $glng; ?>,cLat=<?php echo $clat; ?>,cLng=<?php echo $clng; ?>;
-const m=L.map('result-map').setView([(uLat+cLat)/2,(uLng+cLng)/2],4);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(m);
-L.marker([uLat,uLng]).addTo(m).bindPopup('Votre estimation - <?php echo $dkm; ?> km');
-L.marker([cLat,cLng]).addTo(m).bindPopup('Lieu correct - <?php echo htmlspecialchars($img_loc); ?>');
-L.polyline([[uLat,uLng],[cLat,cLng]],{color:'red',weight:2}).addTo(m);
-m.fitBounds([[uLat,uLng],[cLat,cLng]],{padding:[50,50]});
+var lat_joueur = <?php echo $lat_utilisateur; ?>;
+var lng_joueur = <?php echo $lng_utilisateur; ?>;
+var lat_correct = <?php echo $lat_correcte; ?>;
+var lng_correct = <?php echo $lng_correcte; ?>;
+
+var carte = L.map('carte_resultat').setView([(lat_joueur + lat_correct) / 2, (lng_joueur + lng_correct) / 2], 3);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	attribution: '© OpenStreetMap'
+}).addTo(carte);
+
+L.marker([lat_joueur, lng_joueur]).addTo(carte).bindPopup('Votre reponse');
+L.marker([lat_correct, lng_correct]).addTo(carte).bindPopup('Lieu correct : <?php echo htmlspecialchars($image_lieu); ?>');
+
+L.polyline([[lat_joueur, lng_joueur], [lat_correct, lng_correct]], {color: 'red'}).addTo(carte);
+
+carte.fitBounds([[lat_joueur, lng_joueur], [lat_correct, lng_correct]], {padding: [40, 40]});
 </script>
+
 </body>
 </html>

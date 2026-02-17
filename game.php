@@ -1,93 +1,154 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+
 $db = Database::getInstance();
-$images = $db->getAllImages();
-if (!isset($_SESSION['total_score'])) { $_SESSION['total_score'] = 0; $_SESSION['rounds_played'] = 0; }
-if (!isset($_SESSION['image_index']) || !isset($_SESSION['shuffled_images'])) {
-    $_SESSION['image_index'] = 0;
-    shuffle($images);
-    $_SESSION['shuffled_images'] = $images;
-} else {
-    $images = $_SESSION['shuffled_images'];
+$liste_images = $db->getAllImages();
+
+if (!isset($_SESSION['score_total'])) {
+	$_SESSION['score_total'] = 0;
+	$_SESSION['nb_rounds'] = 0;
 }
-$idx = $_SESSION['image_index'];
-if ($idx >= count($images)) { $_SESSION['image_index'] = 0; $idx = 0; shuffle($images); $_SESSION['shuffled_images'] = $images; }
-$img = $images[$idx];
-$_SESSION['correct_year'] = $img['year'];
-$_SESSION['image_url'] = $img['url'];
-$_SESSION['image_location'] = $img['location'];
-$_SESSION['image_description'] = $img['description'];
-$_SESSION['image_hint'] = $img['hint'];
-$coords = [1906=>[37.7749,-122.4194],1929=>[40.7067,-74.0089],1945=>[51.5074,-0.1278],1963=>[38.8899,-77.0091],1968=>[50.0755,14.4378],1986=>[51.3890,30.0994],1989=>[52.5200,13.4050],2001=>[40.7128,-74.0060],2011=>[30.0444,31.2357]];
-$_SESSION['correct_lat'] = $coords[$img['year']][0];
-$_SESSION['correct_lng'] = $coords[$img['year']][1];
+
+if (!isset($_SESSION['images_melangees'])) {
+	shuffle($liste_images);
+	$_SESSION['images_melangees'] = $liste_images;
+	$_SESSION['index_image'] = 0;
+} else {
+	$liste_images = $_SESSION['images_melangees'];
+}
+
+$index = $_SESSION['index_image'];
+
+if ($index >= count($liste_images)) {
+	$index = 0;
+	$_SESSION['index_image'] = 0;
+	shuffle($liste_images);
+	$_SESSION['images_melangees'] = $liste_images;
+}
+
+$image = $liste_images[$index];
+
+$_SESSION['correct_year'] = $image['year'];
+$_SESSION['image_url'] = $image['url'];
+$_SESSION['image_location'] = $image['location'];
+$_SESSION['image_description'] = $image['description'];
+$_SESSION['image_hint'] = $image['hint'];
+
+$coordonnees = array(
+	1906 => array(37.7749, -122.4194),
+	1929 => array(40.7067, -74.0089),
+	1945 => array(51.5074, -0.1278),
+	1963 => array(38.8899, -77.0091),
+	1968 => array(50.0755, 14.4378),
+	1986 => array(51.3890, 30.0994),
+	1989 => array(52.5200, 13.4050),
+	2001 => array(40.7128, -74.0060),
+	2011 => array(30.0444, 31.2357)
+);
+
+$_SESSION['correct_lat'] = $coordonnees[$image['year']][0];
+$_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>TimeGuessr</title>
+<title>TimeGuessr - Jeu</title>
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>#map{width:100%;height:400px;border:1px solid #ccc;margin:10px 0}</style>
 </head>
 <body>
-<div class="header"><a href="home.php"><div class="logo">TimeGuessr</div></a><p class="subtitle">Devinez l'annee et le lieu !</p></div>
-<div class="container">
-<div class="game-info">
-<div class="score-display">
-<div class="score-item"><div class="score-label">Score</div><div class="score-value"><?php echo $_SESSION['total_score']; ?></div></div>
-<div class="score-item"><div class="score-label">Rounds</div><div class="score-value"><?php echo $_SESSION['rounds_played']; ?></div></div>
-<div class="score-item"><div class="score-label">Image</div><div class="score-value"><?php echo ($idx+1).'/'.count($images); ?></div></div>
+
+<div class="header">
+	<a href="home.php"><h1>TimeGuessr</h1></a>
 </div>
-</div>
+
+<p>Score : <b><?php echo $_SESSION['score_total']; ?></b> &nbsp;&nbsp; Rounds joues : <b><?php echo $_SESSION['nb_rounds']; ?></b> &nbsp;&nbsp; Image : <b><?php echo $index + 1; ?>/<?php echo count($liste_images); ?></b></p>
+
+<hr>
+
+<h2>Devinez l'annee et le lieu de cette photo :</h2>
+
 <div class="image-container">
-<img src="<?php echo htmlspecialchars($img['url']); ?>" alt="Photo">
-<div class="image-hint">Indice : <?php echo htmlspecialchars($img['hint']); ?></div>
+	<img src="<?php echo $image['url']; ?>" alt="photo historique">
 </div>
-<div class="guess-section">
-<h2>En quelle annee et ou cette photo a-t-elle ete prise ?</h2>
-<div style="margin-bottom:20px">
-<h3>Annee</h3>
-<input type="number" id="year-input" class="year-input" min="1800" max="2024" value="1950"><br>
-<input type="range" id="year-slider" class="year-slider" min="1800" max="2024" value="1950" step="1">
-</div>
-<div>
-<h3>Lieu</h3>
-<p class="map-instructions">Cliquez sur la carte pour placer votre marqueur</p>
-<div id="map"></div>
-<div class="coordinates-display" id="coords-display">Aucune position selectionnee</div>
-</div>
-<form id="guess-form" action="process_guess.php" method="POST" style="margin-top:15px">
-<input type="hidden" id="year-guess" name="year_guess" value="1950">
-<input type="hidden" id="lat-guess" name="lat_guess" value="">
-<input type="hidden" id="lng-guess" name="lng_guess" value="">
-<button type="submit" class="btn btn-primary" id="submit-btn" disabled>Valider</button>
-<p style="font-size:13px;color:#666;margin-top:8px">Vous devez cliquer sur la carte avant de valider.</p>
+
+<p><b>Indice :</b> <?php echo $image['hint']; ?></p>
+
+<hr>
+
+<h3>Votre annee :</h3>
+<input type="number" id="annee" min="1800" max="2024" value="1950" style="font-size:20px; width:100px; padding:5px;">
+<br><br>
+<input type="range" id="slider_annee" min="1800" max="2024" value="1950" style="width:400px;">
+
+<br><br>
+
+<h3>Votre lieu (cliquez sur la carte) :</h3>
+<div id="map" style="width:600px; height:350px; border:1px solid black;"></div>
+<br>
+<p id="coords_affichage" style="color:blue;">Aucune position choisie</p>
+
+<br>
+
+<form id="formulaire" action="process_guess.php" method="POST">
+	<input type="hidden" id="annee_hidden" name="year_guess" value="1950">
+	<input type="hidden" id="lat_hidden" name="lat_guess" value="">
+	<input type="hidden" id="lng_hidden" name="lng_guess" value="">
+	<button type="submit" id="btn_valider" class="btn" disabled>Valider ma reponse</button>
 </form>
+
+<p style="color:red; font-size:13px;">Vous devez cliquer sur la carte avant de valider !</p>
+
+<br>
+
+<div class="footer">
+	<p>Projet scolaire - TimeGuessr</p>
 </div>
-</div>
-<div class="footer"><p>TimeGuessr - projet scolaire</p></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="assets/js/main.js"></script>
 <script>
-const map = L.map('map').setView([20,0],2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
-let marker=null,selectedLat=null,selectedLng=null;
-map.on('click',function(e){
-    if(marker) map.removeLayer(marker);
-    marker=L.marker([e.latlng.lat,e.latlng.lng]).addTo(map);
-    selectedLat=e.latlng.lat.toFixed(4);
-    selectedLng=e.latlng.lng.toFixed(4);
-    document.getElementById('coords-display').innerHTML='Position : '+selectedLat+', '+selectedLng;
-    document.getElementById('lat-guess').value=selectedLat;
-    document.getElementById('lng-guess').value=selectedLng;
-    document.getElementById('submit-btn').disabled=false;
+var map = L.map('map').setView([20, 0], 2);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	attribution: '© OpenStreetMap'
+}).addTo(map);
+
+var marqueur = null;
+var lat_choisie = null;
+var lng_choisie = null;
+
+map.on('click', function(e) {
+	if (marqueur != null) {
+		map.removeLayer(marqueur);
+	}
+	marqueur = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+	lat_choisie = e.latlng.lat.toFixed(4);
+	lng_choisie = e.latlng.lng.toFixed(4);
+	document.getElementById('coords_affichage').innerHTML = 'Position choisie : ' + lat_choisie + ', ' + lng_choisie;
+	document.getElementById('lat_hidden').value = lat_choisie;
+	document.getElementById('lng_hidden').value = lng_choisie;
+	document.getElementById('btn_valider').disabled = false;
 });
-document.getElementById('year-input').addEventListener('input',function(){document.getElementById('year-guess').value=this.value;});
-document.getElementById('year-slider').addEventListener('input',function(){document.getElementById('year-input').value=this.value;document.getElementById('year-guess').value=this.value;});
-document.getElementById('guess-form').addEventListener('submit',function(e){if(!selectedLat||!selectedLng){e.preventDefault();alert('Cliquez sur la carte avant de valider !');}});
+
+document.getElementById('annee').addEventListener('input', function() {
+	document.getElementById('slider_annee').value = this.value;
+	document.getElementById('annee_hidden').value = this.value;
+});
+
+document.getElementById('slider_annee').addEventListener('input', function() {
+	document.getElementById('annee').value = this.value;
+	document.getElementById('annee_hidden').value = this.value;
+});
+
+document.getElementById('formulaire').addEventListener('submit', function(e) {
+	if (lat_choisie == null) {
+		e.preventDefault();
+		alert('Vous devez cliquer sur la carte !');
+	}
+});
 </script>
+
 </body>
 </html>

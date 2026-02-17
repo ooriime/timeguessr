@@ -50,6 +50,9 @@ $_SESSION['distance_km'] = round($distance_km);
 $_SESSION['year_score'] = $score_annee;
 $_SESSION['distance_score'] = $score_distance;
 $_SESSION['score'] = $score_round;
+if (!isset($_SESSION['score_total'])) { $_SESSION['score_total'] = 0; }
+if (!isset($_SESSION['nb_rounds'])) { $_SESSION['nb_rounds'] = 0; }
+if (!isset($_SESSION['index_image'])) { $_SESSION['index_image'] = 0; }
 $_SESSION['score_total'] += $score_round;
 $_SESSION['nb_rounds'] += 1;
 

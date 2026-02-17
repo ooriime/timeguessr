@@ -5,10 +5,9 @@ require_once 'includes/db.php';
 $db = Database::getInstance();
 $liste_images = $db->getAllImages();
 
-if (!isset($_SESSION['score_total'])) {
-	$_SESSION['score_total'] = 0;
-	$_SESSION['nb_rounds'] = 0;
-}
+if (!isset($_SESSION['score_total'])) { $_SESSION['score_total'] = 0; }
+if (!isset($_SESSION['nb_rounds'])) { $_SESSION['nb_rounds'] = 0; }
+if (!isset($_SESSION['index_image'])) { $_SESSION['index_image'] = 0; }
 
 if (!isset($_SESSION['images_melangees'])) {
 	shuffle($liste_images);

@@ -2,7 +2,7 @@
 session_start();
 
 // Rediriger si on accède directement à cette page
-if (!isset($_SESSION['user_guess'])) {
+if (!isset($_SESSION['user_guess_year'])) {
     header('Location: game.php');
     exit;
 }
@@ -53,136 +53,81 @@ if ($percentage >= 95) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeGuessr - Résultat</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>TimeGuessr - Resultat</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #result-map {
-            width: 100%;
-            height: 500px;
-            border-radius: 12px;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-    </style>
-    <style>
-        .result-perfect { color: #10b981; }
-        .result-excellent { color: #3b82f6; }
-        .result-good { color: #8b5cf6; }
-        .result-ok { color: #f59e0b; }
-        .result-medium { color: #f97316; }
-        .result-bad { color: #ef4444; }
+        #result-map { width: 100%; height: 400px; border: 1px solid #ccc; margin: 15px 0; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <a href="home.php" style="text-decoration: none;">
-            <div class="logo">⏰ TimeGuessr</div>
-        </a>
-        <p class="subtitle">Résultat de votre estimation</p>
-    </header>
 
-    <div class="container">
-        <div class="result-container">
-            <h1 class="result-title <?php echo $message_class; ?>">
-                <?php echo $message; ?>
-            </h1>
+<div class="header">
+    <a href="home.php"><div class="logo">TimeGuessr</div></a>
+    <p class="subtitle">Resultat de votre estimation</p>
+</div>
 
-            <div class="image-container" style="margin-bottom: 30px;">
-                <img src="<?php echo htmlspecialchars($image_url); ?>" alt="Image historique" onerror="this.style.display='none';">
+<div class="container">
+    <div class="result-container">
+
+        <h1 class="result-title <?php echo $message_class; ?>">
+            <?php echo $message; ?>
+        </h1>
+
+        <div class="image-container">
+            <img src="<?php echo htmlspecialchars($image_url); ?>" alt="Photo historique">
+        </div>
+
+        <div id="result-map"></div>
+
+        <h3>Resultats :</h3>
+
+        <div class="result-grid">
+            <div class="result-card">
+                <div class="result-label">Votre annee</div>
+                <div class="result-value"><?php echo $user_guess_year; ?></div>
             </div>
-
-            <!-- CARTE DES RÉSULTATS -->
-            <div id="result-map"></div>
-
-            <!-- SCORES -->
-            <div class="result-grid" style="margin-top: 30px;">
-                <div class="result-card">
-                    <div class="result-label">📅 Score Année</div>
-                    <div class="result-value"><?php echo number_format($year_score); ?></div>
-                    <div style="color: #94a3b8; margin-top: 10px;">
-                        Différence : <?php echo $year_difference; ?> <?php echo $year_difference <= 1 ? 'an' : 'ans'; ?>
-                    </div>
-                </div>
-
-                <div class="result-card">
-                    <div class="result-label">🗺️ Score Distance</div>
-                    <div class="result-value"><?php echo number_format($distance_score); ?></div>
-                    <div style="color: #94a3b8; margin-top: 10px;">
-                        Distance : <?php echo number_format($distance_km); ?> km
-                    </div>
-                </div>
-
-                <div class="result-card result-correct">
-                    <div class="result-label">🏆 Score Total</div>
-                    <div class="result-value"><?php echo number_format($score); ?></div>
-                    <div style="color: #94a3b8; margin-top: 10px;">
-                        / 10,000 points
-                    </div>
-                </div>
+            <div class="result-card result-correct">
+                <div class="result-label">Annee correcte</div>
+                <div class="result-value"><?php echo $correct_year; ?></div>
             </div>
-
-            <div class="result-grid" style="margin-top: 20px;">
-                <div class="result-card">
-                    <div class="result-label">Votre estimation année</div>
-                    <div class="result-value"><?php echo $user_guess_year; ?></div>
-                </div>
-
-                <div class="result-card result-correct">
-                    <div class="result-label">Année correcte</div>
-                    <div class="result-value"><?php echo $correct_year; ?></div>
-                </div>
-            </div>
-
-            <div class="result-card" style="margin-top: 30px; text-align: left;">
-                <div class="result-label">À propos de cette image</div>
-                <div style="margin-top: 15px; color: var(--text-primary);">
-                    <p style="font-size: 1.2em; margin-bottom: 10px;">
-                        <strong>📍 <?php echo htmlspecialchars($image_location); ?></strong>
-                    </p>
-                    <p style="font-size: 1em; color: var(--text-secondary);">
-                        <?php echo htmlspecialchars($image_description); ?>
-                    </p>
-                </div>
-            </div>
-
-            <div class="result-card" style="margin-top: 20px;">
-                <div class="score-display" style="justify-content: center;">
-                    <div class="score-item">
-                        <div class="score-label">Score Total</div>
-                        <div class="score-value"><?php echo number_format($total_score); ?></div>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-label">Rounds Joués</div>
-                        <div class="score-value"><?php echo $rounds_played; ?></div>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-label">Moyenne</div>
-                        <div class="score-value">
-                            <?php echo $rounds_played > 0 ? number_format($total_score / $rounds_played) : 0; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="btn-container">
-                <a href="game.php" class="btn btn-primary">
-                    ▶️ Image Suivante
-                </a>
-                <a href="reset_game.php" class="btn btn-success">
-                    🔄 Recommencer le jeu
-                </a>
+            <div class="result-card">
+                <div class="result-label">Difference</div>
+                <div class="result-value"><?php echo $year_difference; ?> ans</div>
             </div>
         </div>
-    </div>
 
-    <footer class="footer">
-        <p>TimeGuessr - Testez vos connaissances en histoire</p>
-    </footer>
+        <div class="result-grid">
+            <div class="result-card">
+                <div class="result-label">Score annee</div>
+                <div class="result-value"><?php echo number_format($year_score); ?></div>
+            </div>
+            <div class="result-card">
+                <div class="result-label">Score distance (<?php echo number_format($distance_km); ?> km)</div>
+                <div class="result-value"><?php echo number_format($distance_score); ?></div>
+            </div>
+            <div class="result-card result-correct">
+                <div class="result-label">Score total</div>
+                <div class="result-value"><?php echo number_format($score); ?> / 10 000</div>
+            </div>
+        </div>
+
+        <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background: #f9f9f9;">
+            <strong>Lieu : <?php echo htmlspecialchars($image_location); ?></strong><br>
+            <span style="color: #555;"><?php echo htmlspecialchars($image_description); ?></span>
+        </div>
+
+        <div class="btn-container">
+            <a href="game.php" class="btn btn-primary">Image suivante</a>
+            <a href="reset_game.php" class="btn btn-success">Recommencer</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer">
+    <p>TimeGuessr - projet scolaire</p>
+</div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="assets/js/main.js"></script>

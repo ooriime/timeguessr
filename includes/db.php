@@ -1,7 +1,4 @@
 <?php
-/**
- * Gestion de la base de données SQLite
- */
 
 class Database {
     private static $instance = null;
@@ -11,7 +8,7 @@ class Database {
         $db_path = __DIR__ . '/../timeguessr.db';
 
         if (!file_exists($db_path)) {
-            die("Erreur : Base de données non trouvée. Exécutez setup_sqlite.php d'abord.");
+            die("Erreur : Base de donnees non trouvee.");
         }
 
         $this->db = new SQLite3($db_path);
@@ -28,9 +25,6 @@ class Database {
         return $this->db;
     }
 
-    /**
-     * Récupérer toutes les images
-     */
     public function getAllImages() {
         $query = "SELECT * FROM images ORDER BY id ASC";
         $results = $this->db->query($query);
@@ -43,9 +37,6 @@ class Database {
         return $images;
     }
 
-    /**
-     * Récupérer une image par ID
-     */
     public function getImageById($id) {
         $stmt = $this->db->prepare("SELECT * FROM images WHERE id = :id");
         $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
@@ -54,9 +45,6 @@ class Database {
         return $result->fetchArray(SQLITE3_ASSOC);
     }
 
-    /**
-     * Récupérer une image aléatoire
-     */
     public function getRandomImage() {
         $query = "SELECT * FROM images ORDER BY RANDOM() LIMIT 1";
         $result = $this->db->query($query);
@@ -64,9 +52,6 @@ class Database {
         return $result->fetchArray(SQLITE3_ASSOC);
     }
 
-    /**
-     * Compter le nombre total d'images
-     */
     public function countImages() {
         $query = "SELECT COUNT(*) as count FROM images";
         $result = $this->db->query($query);
@@ -75,9 +60,6 @@ class Database {
         return $row['count'];
     }
 
-    /**
-     * Ajouter une nouvelle image
-     */
     public function addImage($url, $year, $location, $description, $hint) {
         $stmt = $this->db->prepare("
             INSERT INTO images (url, year, location, description, hint)
@@ -89,37 +71,6 @@ class Database {
         $stmt->bindValue(':location', $location, SQLITE3_TEXT);
         $stmt->bindValue(':description', $description, SQLITE3_TEXT);
         $stmt->bindValue(':hint', $hint, SQLITE3_TEXT);
-
-        return $stmt->execute();
-    }
-
-    /**
-     * Mettre à jour une image
-     */
-    public function updateImage($id, $url, $year, $location, $description, $hint) {
-        $stmt = $this->db->prepare("
-            UPDATE images
-            SET url = :url, year = :year, location = :location,
-                description = :description, hint = :hint
-            WHERE id = :id
-        ");
-
-        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
-        $stmt->bindValue(':url', $url, SQLITE3_TEXT);
-        $stmt->bindValue(':year', $year, SQLITE3_INTEGER);
-        $stmt->bindValue(':location', $location, SQLITE3_TEXT);
-        $stmt->bindValue(':description', $description, SQLITE3_TEXT);
-        $stmt->bindValue(':hint', $hint, SQLITE3_TEXT);
-
-        return $stmt->execute();
-    }
-
-    /**
-     * Supprimer une image
-     */
-    public function deleteImage($id) {
-        $stmt = $this->db->prepare("DELETE FROM images WHERE id = :id");
-        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
 
         return $stmt->execute();
     }

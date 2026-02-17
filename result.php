@@ -133,24 +133,20 @@ if ($percentage >= 95) {
     <script src="assets/js/main.js"></script>
 
     <script>
-        // Coordonnées
         const userLat = <?php echo $user_guess_lat; ?>;
         const userLng = <?php echo $user_guess_lng; ?>;
         const correctLat = <?php echo $correct_lat; ?>;
         const correctLng = <?php echo $correct_lng; ?>;
 
-        // Créer la carte centrée entre les deux points
         const centerLat = (userLat + correctLat) / 2;
         const centerLng = (userLng + correctLng) / 2;
 
         const resultMap = L.map('result-map').setView([centerLat, centerLng], 4);
 
-        // Ajouter les tuiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(resultMap);
 
-        // Marqueur de votre estimation (rouge)
         L.marker([userLat, userLng], {
             icon: L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -161,9 +157,8 @@ if ($percentage >= 95) {
                 shadowSize: [41, 41]
             })
         }).addTo(resultMap)
-          .bindPopup('<b>Votre estimation</b><br><?php echo number_format($distance_km); ?> km de distance');
+          .bindPopup('Votre estimation - <?php echo number_format($distance_km); ?> km');
 
-        // Marqueur du lieu correct (vert)
         L.marker([correctLat, correctLng], {
             icon: L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -174,20 +169,13 @@ if ($percentage >= 95) {
                 shadowSize: [41, 41]
             })
         }).addTo(resultMap)
-          .bindPopup('<b>Lieu correct</b><br><?php echo htmlspecialchars($image_location); ?>');
+          .bindPopup('Lieu correct - <?php echo htmlspecialchars($image_location); ?>');
 
-        // Ligne entre les deux points
         L.polyline(
             [[userLat, userLng], [correctLat, correctLng]],
-            {
-                color: '#ef4444',
-                weight: 3,
-                opacity: 0.7,
-                dashArray: '10, 10'
-            }
+            { color: 'red', weight: 2 }
         ).addTo(resultMap);
 
-        // Ajuster la vue pour voir les deux marqueurs
         resultMap.fitBounds([
             [userLat, userLng],
             [correctLat, correctLng]

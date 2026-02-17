@@ -1,0 +1,40 @@
+# Fichiers de session
+/tmp/
+/sessions/
+
+# Statistiques (peuvent varier selon l'environnement)
+stats.json
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+error_log
+
+# Fichiers de configuration locaux
+config.local.php
+
+# Base de données SQLite (contient des données locales)
+*.db
+*.sqlite
+*.sqlite3
+
+# Fichiers de données générés localement
+stats.json
+data.json
+
+# Node modules (si vous ajoutez du JavaScript)
+node_modules/
+
+# Dépendances Composer (si vous ajoutez PHP)
+vendor/
+composer.lock

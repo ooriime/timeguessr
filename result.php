@@ -51,7 +51,7 @@ if ($score_round >= 8000) {
 	<a href="home.php"><h1>TimeGuessr</h1></a>
 </div>
 
-<h2 style="color:<?php echo $couleur; ?>"><?php echo $message; ?></h2>
+<h2><?php echo $message; ?></h2>
 
 <img src="<?php echo $image_url; ?>" alt="photo" style="width:100%; max-height:400px;">
 
@@ -66,7 +66,7 @@ if ($score_round >= 8000) {
 	</tr>
 	<tr>
 		<td><b>Annee correcte</b></td>
-		<td style="color:green;"><b><?php echo $annee_correcte; ?></b></td>
+		<td><b><?php echo $annee_correcte; ?></b></td>
 	</tr>
 	<tr style="background-color:#f0f0f0;">
 		<td><b>Difference</b></td>
@@ -86,7 +86,7 @@ if ($score_round >= 8000) {
 	</tr>
 	<tr style="background-color:lightyellow;">
 		<td><b>Score du round</b></td>
-		<td><b style="color:navy; font-size:18px;"><?php echo $score_round; ?> / 10000</b></td>
+		<td><b><?php echo $score_round; ?> / 10000</b></td>
 	</tr>
 </table>
 

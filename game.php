@@ -91,7 +91,7 @@ $_SESSION['lng_correcte'] = $coordonnees[$image['year']][1];
 <h3>Votre lieu (cliquez sur la carte) :</h3>
 <div id="map" style="width:600px; height:350px; border:1px solid black;"></div>
 <br>
-<p id="coords_affichage" style="color:blue;">Aucune position choisie</p>
+<p id="coords_affichage">Aucune position choisie</p>
 
 <br>
 
@@ -102,7 +102,7 @@ $_SESSION['lng_correcte'] = $coordonnees[$image['year']][1];
 	<button type="submit" id="btn_valider" class="btn" disabled>Valider ma reponse</button>
 </form>
 
-<p style="color:red; font-size:13px;">Vous devez cliquer sur la carte avant de valider !</p>
+<p style="font-size:13px;">Vous devez cliquer sur la carte avant de valider !</p>
 
 <br>
 

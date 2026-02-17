@@ -103,7 +103,7 @@ $_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
 <br>
 
 <div class="footer">
-	<p>Projet scolaire - TimeGuessr</p>
+	<p>TimeGuessr</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

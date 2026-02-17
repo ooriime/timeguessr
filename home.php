@@ -31,7 +31,7 @@ session_start();
 <br><br>
 
 <div class="footer">
-	<p>Projet scolaire - TimeGuessr</p>
+	<p>TimeGuessr</p>
 </div>
 
 </body>

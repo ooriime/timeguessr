@@ -23,6 +23,30 @@ error_log
 # Fichiers de configuration locaux
 config.local.php
 
+# Scripts utilitaires (non nécessaires au fonctionnement)
+add_image_to_db.php
+download_images.php
+download_real_historical_images.php
+generate_placeholder_images.php
+reduce_to_10_images.php
+setup_database.php
+setup_sqlite.php
+update_data_real_images.php
+download_guide.html
+start.sh
+_gallery.php.disabled
+_test_images.php.disabled
+
+# Documentation
+CHANGELOG.md
+DATABASE.md
+GUIDE_10_IMAGES.md
+GUIDE_RECHERCHE_IMAGES.md
+IMAGES_GUIDE.md
+INSTALL.md
+SQLITE_INFO.md
+STRUCTURE.txt
+
 # Base de données SQLite (contient des données locales)
 *.db
 *.sqlite

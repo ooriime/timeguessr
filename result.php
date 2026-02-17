@@ -1,41 +1,40 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_guess_year'])) {
+
+if (!isset($_SESSION['annee_joueur'])) {
 	header('Location: game.php');
 	exit;
 }
 
-$annee_utilisateur = $_SESSION['user_guess_year'];
-$lat_utilisateur = $_SESSION['user_guess_lat'];
-$lng_utilisateur = $_SESSION['user_guess_lng'];
-$annee_correcte = $_SESSION['correct_year'];
-$lat_correcte = $_SESSION['correct_lat'];
-$lng_correcte = $_SESSION['correct_lng'];
-$difference_annee = $_SESSION['year_difference'];
-$distance = $_SESSION['distance_km'];
-$score_annee = $_SESSION['year_score'];
-$score_distance = $_SESSION['distance_score'];
-$score_total_round = $_SESSION['score'];
-$image_url = $_SESSION['image_url'];
-$image_lieu = $_SESSION['image_location'];
-$image_description = $_SESSION['image_description'];
+$annee_joueur = $_SESSION['annee_joueur'];
+$annee_correcte = $_SESSION['annee_correcte'];
+$difference = $_SESSION['difference'];
+$distance_km = $_SESSION['distance_km'];
+$score_annee = $_SESSION['score_annee'];
+$score_distance = $_SESSION['score_distance'];
+$score_round = $_SESSION['score_round'];
 $score_total = $_SESSION['score_total'];
 $nb_rounds = $_SESSION['nb_rounds'];
+$image_url = $_SESSION['image_url'];
+$image_lieu = $_SESSION['image_lieu'];
+$image_description = $_SESSION['image_description'];
+$lat_joueur = $_SESSION['lat_joueur'];
+$lng_joueur = $_SESSION['lng_joueur'];
+$lat_correcte = $_SESSION['lat_correcte'];
+$lng_correcte = $_SESSION['lng_correcte'];
 
-$pourcentage = ($score_total_round / 10000) * 100;
-
-if ($pourcentage >= 95) {
+if ($score_round >= 8000) {
 	$message = "Parfait ! Excellent !";
-	$couleur_message = "result-perfect";
-} elseif ($pourcentage >= 70) {
+	$couleur = "green";
+} elseif ($score_round >= 5000) {
 	$message = "Bien joue !";
-	$couleur_message = "result-good";
-} elseif ($pourcentage >= 40) {
+	$couleur = "blue";
+} elseif ($score_round >= 2000) {
 	$message = "Pas mal !";
-	$couleur_message = "result-ok";
+	$couleur = "orange";
 } else {
 	$message = "Dommage, essayez encore !";
-	$couleur_message = "result-bad";
+	$couleur = "red";
 }
 ?>
 <!DOCTYPE html>
@@ -52,9 +51,9 @@ if ($pourcentage >= 95) {
 	<a href="home.php"><h1>TimeGuessr</h1></a>
 </div>
 
-<h2 class="<?php echo $couleur_message; ?>"><?php echo $message; ?></h2>
+<h2 style="color:<?php echo $couleur; ?>"><?php echo $message; ?></h2>
 
-<img src="<?php echo htmlspecialchars($image_url); ?>" alt="photo" style="width:100%; max-height:400px;">
+<img src="<?php echo $image_url; ?>" alt="photo" style="width:100%; max-height:400px;">
 
 <br><br>
 
@@ -63,7 +62,7 @@ if ($pourcentage >= 95) {
 <table border="1" cellpadding="10" style="border-collapse:collapse;">
 	<tr style="background-color:#f0f0f0;">
 		<td><b>Votre annee</b></td>
-		<td><?php echo $annee_utilisateur; ?></td>
+		<td><?php echo $annee_joueur; ?></td>
 	</tr>
 	<tr>
 		<td><b>Annee correcte</b></td>
@@ -71,11 +70,11 @@ if ($pourcentage >= 95) {
 	</tr>
 	<tr style="background-color:#f0f0f0;">
 		<td><b>Difference</b></td>
-		<td><?php echo $difference_annee; ?> ans</td>
+		<td><?php echo $difference; ?> ans</td>
 	</tr>
 	<tr>
 		<td><b>Distance</b></td>
-		<td><?php echo $distance; ?> km</td>
+		<td><?php echo $distance_km; ?> km</td>
 	</tr>
 	<tr style="background-color:#f0f0f0;">
 		<td><b>Score annee</b></td>
@@ -87,19 +86,19 @@ if ($pourcentage >= 95) {
 	</tr>
 	<tr style="background-color:lightyellow;">
 		<td><b>Score du round</b></td>
-		<td><b style="color:navy; font-size:18px;"><?php echo $score_total_round; ?> / 10000</b></td>
+		<td><b style="color:navy; font-size:18px;"><?php echo $score_round; ?> / 10000</b></td>
 	</tr>
 </table>
 
 <br>
 
-<p><b>Lieu :</b> <?php echo htmlspecialchars($image_lieu); ?></p>
-<p><?php echo htmlspecialchars($image_description); ?></p>
+<p><b>Lieu :</b> <?php echo $image_lieu; ?></p>
+<p><?php echo $image_description; ?></p>
 
 <br>
 
 <h3>Carte :</h3>
-<div id="carte_resultat" style="width:600px; height:350px; border:1px solid black;"></div>
+<div id="carte" style="width:600px; height:350px; border:1px solid black;"></div>
 
 <br>
 
@@ -112,29 +111,18 @@ if ($pourcentage >= 95) {
 
 <br><br>
 
-<div class="footer">
-	<p>TimeGuessr</p>
-</div>
+<div class="footer"><p>TimeGuessr</p></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-var lat_joueur = <?php echo $lat_utilisateur; ?>;
-var lng_joueur = <?php echo $lng_utilisateur; ?>;
-var lat_correct = <?php echo $lat_correcte; ?>;
-var lng_correct = <?php echo $lng_correcte; ?>;
+var carte = L.map('carte').setView([<?php echo $lat_joueur; ?>, <?php echo $lng_joueur; ?>], 3);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap'}).addTo(carte);
 
-var carte = L.map('carte_resultat').setView([(lat_joueur + lat_correct) / 2, (lng_joueur + lng_correct) / 2], 3);
+L.marker([<?php echo $lat_joueur; ?>, <?php echo $lng_joueur; ?>]).addTo(carte).bindPopup('Votre reponse');
+L.marker([<?php echo $lat_correcte; ?>, <?php echo $lng_correcte; ?>]).addTo(carte).bindPopup('Lieu correct : <?php echo $image_lieu; ?>');
+L.polyline([[<?php echo $lat_joueur; ?>, <?php echo $lng_joueur; ?>], [<?php echo $lat_correcte; ?>, <?php echo $lng_correcte; ?>]], {color: 'red'}).addTo(carte);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	attribution: '© OpenStreetMap'
-}).addTo(carte);
-
-L.marker([lat_joueur, lng_joueur]).addTo(carte).bindPopup('Votre reponse');
-L.marker([lat_correct, lng_correct]).addTo(carte).bindPopup('Lieu correct : <?php echo htmlspecialchars($image_lieu); ?>');
-
-L.polyline([[lat_joueur, lng_joueur], [lat_correct, lng_correct]], {color: 'red'}).addTo(carte);
-
-carte.fitBounds([[lat_joueur, lng_joueur], [lat_correct, lng_correct]], {padding: [40, 40]});
+carte.fitBounds([[<?php echo $lat_joueur; ?>, <?php echo $lng_joueur; ?>], [<?php echo $lat_correcte; ?>, <?php echo $lng_correcte; ?>]], {padding: [40, 40]});
 </script>
 
 </body>

@@ -2,12 +2,18 @@
 session_start();
 require_once 'includes/db.php';
 
-$db = Database::getInstance();
-$liste_images = $db->getAllImages();
+$result = mysqli_query($connexion, "SELECT * FROM images");
+$liste_images = array();
+while ($ligne = mysqli_fetch_assoc($result)) {
+	$liste_images[] = $ligne;
+}
 
-if (!isset($_SESSION['score_total'])) { $_SESSION['score_total'] = 0; }
-if (!isset($_SESSION['nb_rounds'])) { $_SESSION['nb_rounds'] = 0; }
-if (!isset($_SESSION['index_image'])) { $_SESSION['index_image'] = 0; }
+if (!isset($_SESSION['score_total'])) {
+	$_SESSION['score_total'] = 0;
+}
+if (!isset($_SESSION['nb_rounds'])) {
+	$_SESSION['nb_rounds'] = 0;
+}
 
 if (!isset($_SESSION['images_melangees'])) {
 	shuffle($liste_images);
@@ -22,17 +28,15 @@ $index = $_SESSION['index_image'];
 if ($index >= count($liste_images)) {
 	$index = 0;
 	$_SESSION['index_image'] = 0;
-	shuffle($liste_images);
-	$_SESSION['images_melangees'] = $liste_images;
 }
 
 $image = $liste_images[$index];
 
-$_SESSION['correct_year'] = $image['year'];
+$_SESSION['annee_correcte'] = $image['year'];
 $_SESSION['image_url'] = $image['url'];
-$_SESSION['image_location'] = $image['location'];
+$_SESSION['image_lieu'] = $image['location'];
 $_SESSION['image_description'] = $image['description'];
-$_SESSION['image_hint'] = $image['hint'];
+$_SESSION['image_indice'] = $image['hint'];
 
 $coordonnees = array(
 	1906 => array(37.7749, -122.4194),
@@ -46,8 +50,8 @@ $coordonnees = array(
 	2011 => array(30.0444, 31.2357)
 );
 
-$_SESSION['correct_lat'] = $coordonnees[$image['year']][0];
-$_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
+$_SESSION['lat_correcte'] = $coordonnees[$image['year']][0];
+$_SESSION['lng_correcte'] = $coordonnees[$image['year']][1];
 ?>
 <!DOCTYPE html>
 <html>
@@ -63,7 +67,7 @@ $_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
 	<a href="home.php"><h1>TimeGuessr</h1></a>
 </div>
 
-<p>Score : <b><?php echo $_SESSION['score_total']; ?></b> &nbsp;&nbsp; Rounds joues : <b><?php echo $_SESSION['nb_rounds']; ?></b> &nbsp;&nbsp; Image : <b><?php echo $index + 1; ?>/<?php echo count($liste_images); ?></b></p>
+<p>Score : <b><?php echo $_SESSION['score_total']; ?></b> &nbsp;&nbsp; Rounds : <b><?php echo $_SESSION['nb_rounds']; ?></b> &nbsp;&nbsp; Image : <b><?php echo $index + 1; ?>/<?php echo count($liste_images); ?></b></p>
 
 <hr>
 
@@ -92,9 +96,9 @@ $_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
 <br>
 
 <form id="formulaire" action="process_guess.php" method="POST">
-	<input type="hidden" id="annee_hidden" name="year_guess" value="1950">
-	<input type="hidden" id="lat_hidden" name="lat_guess" value="">
-	<input type="hidden" id="lng_hidden" name="lng_guess" value="">
+	<input type="hidden" id="annee_hidden" name="annee_joueur" value="1950">
+	<input type="hidden" id="lat_hidden" name="lat_joueur" value="">
+	<input type="hidden" id="lng_hidden" name="lng_joueur" value="">
 	<button type="submit" id="btn_valider" class="btn" disabled>Valider ma reponse</button>
 </form>
 
@@ -102,17 +106,12 @@ $_SESSION['correct_lng'] = $coordonnees[$image['year']][1];
 
 <br>
 
-<div class="footer">
-	<p>TimeGuessr</p>
-</div>
+<div class="footer"><p>TimeGuessr</p></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var map = L.map('map').setView([20, 0], 2);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	attribution: '© OpenStreetMap'
-}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap'}).addTo(map);
 
 var marqueur = null;
 var lat_choisie = null;

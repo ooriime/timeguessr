@@ -171,10 +171,3 @@ timeguessr/
 ```
 
 ---
-
-## Commentaires
-
-Ce projet m a permis de consolider la gestion de session PHP, les requetes preparees PDO et l integration de Leaflet.js.
-Le principal defi a ete l equilibrage du calcul de score entre les dimensions temporelle et geographique.
-
-Developpe par Paul - ESGI 1 - Fevrier/Mars 2025.

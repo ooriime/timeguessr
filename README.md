@@ -1,6 +1,5 @@
 # TimeGuessr Clone
 
-Clone du jeu [TimeGuessr](https://timeguessr.com) developpe en **vanilla PHP, HTML et CSS** dans le cadre du projet final ESGI T2.
 
 ---
 
